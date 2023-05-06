@@ -1,0 +1,45 @@
+{
+  "name": "@oriun/next-api",
+  "version": "0.1.1",
+  "private": false,
+  "license": "MIT",
+  "description": "Next.js API routes with Zod validation",
+  "keywords": [
+    "next",
+    "nextjs",
+    "api",
+    "api-routes",
+    "zod",
+    "validation"
+  ],
+  "author": "Oriun",
+  "main": "dist/index.js",
+  "files": [
+    "dist/*",
+    "package.json",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lib": "tsc -p tsconfig.lib.json",
+    "prepublish": "npm run lib"
+  },
+  "peerDependencies": {
+    "autoprefixer": "10.4.14",
+    "next": "13.4.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/node": "20.1.0",
+    "@types/react": "18.2.5",
+    "@types/react-dom": "18.2.4",
+    "eslint": "8.40.0",
+    "eslint-config-next": "13.4.1",
+    "typescript": "5.0.4"
+  }
+}
