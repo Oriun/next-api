@@ -1,95 +1,38 @@
 import { Schemas, Any, Handler } from "./types";
 import type { NextRequest } from "next/server";
 import z from "zod";
-
-const plainResponse = z.strictObject({
-    status: z.number().default(200),
-    headers: z.record(z.string()).default({}),
-    body: z.any().default(null),
-})
+import { bodyParser, cookiesParser, paramsParser, queryParser } from "./parser";
+import { responseParser } from "./response";
 
 export function api<Q extends Any = Any,
     P extends Any = Any,
-    B extends Any = Any
->(schemas: Schemas<Q, P, B>, handler: Handler<Q, P, B>) {
-    return async (request: NextRequest, variables: any) => {
-        const contentType = request.headers.get("content-type")
-        const bodyFormat = contentType?.startsWith("application/json") ? "json" : "text";
-
-        let body: z.infer<B> = await request[bodyFormat]()
-        let query: z.infer<Q> = {}
-        let params: z.infer<P> = variables.params ?? {}
-
-        if (schemas.body) {
-            body = schemas.body.safeParse(body)
-            if (!body.success)
-                return new Response(JSON.stringify(body.error), {
-                    status: 400,
-                })
-            body = body.data
-        }
-        if (schemas.query) {
-            query = parseQueryParams(
-                request,
-                schemas.query ?? z.any()
-            )
-            if (!query.success)
-                return new Response(JSON.stringify(query.error), {
-                    status: 400,
-                })
-            query = query.data
-        }
-        if (schemas.params) {
-            params = schemas.params.safeParse(
-                variables.params ?? {}
-            )
-            if (!params.success)
-                return new Response(JSON.stringify(params.error), {
-                    status: 400,
-                })
-            params = params.data
-        }
+    B extends Any = Any,
+    C extends Any = Any,
+>(schemas: Schemas<Q, P, B, C>, handler: Handler<Q, P, B, C>) {
+    return async (request: NextRequest, _variables: any) => {
         try {
-            const response = await handler.call(null, request, {
+            const body = await bodyParser(request, schemas.body)
+            const query = queryParser(request, schemas.query)
+            const params = paramsParser(_variables, schemas.params)
+            const cookies = cookiesParser(request, schemas.cookies)
+
+            const variables = {
                 body,
                 query,
                 params,
-            })
-            if (response instanceof Response) {
-                return response
+                cookies
             }
-            if (typeof response !== "object") {
-                return new Response(JSON.stringify(response), {
-                    headers: {
-                        "content-type": "application/json",
-                    }
-                })
-            }
-            const parsedResponse = plainResponse.safeParse(response)
-            if (!parsedResponse.success) {
-                return new Response(JSON.stringify(response), {
-                    headers: {
-                        "content-type": "application/json",
-                    }
-                })
-            }
-            const { data } = parsedResponse
-            return new Response(JSON.stringify(data.body), {
-                status: data.status,
-                headers: data.headers,
-            })
+
+            const response = await handler.call(null, variables, request)
+
+
+            return responseParser(response)
+
         } catch (e) {
-            console.error(e)
+            if (e instanceof Response) return e
             return new Response((e as Error).message, {
                 status: 400,
             })
         }
     }
-}
-
-export function parseQueryParams<T extends z.ZodType<any, any>>(
-    request: NextRequest,
-    schema: T
-) {
-    return schema.safeParse(Object.fromEntries(request.nextUrl.searchParams))
 }
