@@ -13,6 +13,7 @@ export type Schemas<Q extends Any = Any,
         body?: B
         cookies?: C
     }
+
 export type Variables<Q extends Any = Any,
     P extends Any = Any,
     B extends Any = Any,
@@ -29,4 +30,12 @@ export type Handler<Q extends Any = Any,
     C extends Any = Any> = (
         variables: Variables<Q, P, B, C>,
         request: NextRequest,
-    ) => any
+    ) => any | Promise<any>
+
+export type Middleware<Q extends Any = Any,
+    P extends Any = Any,
+    B extends Any = Any,
+    C extends Any = Any> = (
+        variables: Variables<Q, P, B, C>,
+        request: NextRequest,
+    ) => Record<string, any> | Promise<Record<string, any>>

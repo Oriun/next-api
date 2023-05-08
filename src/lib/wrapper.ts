@@ -1,14 +1,14 @@
-import { Schemas, Any, Handler } from "./types";
+import { Schemas, Any, Handler, Middleware } from "./types";
 import type { NextRequest } from "next/server";
-import z from "zod";
 import { bodyParser, cookiesParser, paramsParser, queryParser } from "./parser";
 import { responseParser } from "./response";
+import { compose } from "./composer";
 
 export function api<Q extends Any = Any,
     P extends Any = Any,
     B extends Any = Any,
     C extends Any = Any,
->(schemas: Schemas<Q, P, B, C>, handler: Handler<Q, P, B, C>) {
+>(handler: Handler<Q, P, B, C>, schemas: Schemas<Q, P, B, C> = {}) {
     return async (request: NextRequest, _variables: any) => {
         try {
             const body = await bodyParser(request, schemas.body)
@@ -34,5 +34,11 @@ export function api<Q extends Any = Any,
                 status: 400,
             })
         }
+    }
+}
+
+export function createAPI(...middlewares: Middleware[]) {
+    return function (handler: Handler, schemas: Schemas = {}) {
+        return api(compose(handler, ...middlewares), schemas)
     }
 }
