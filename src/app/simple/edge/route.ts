@@ -7,7 +7,8 @@ const schemas = {
         name: z.string().optional()
     })
 }
-export const GET = api(schemas, (_ctx, _req) => {
+export const GET = api((_ctx, _req) => {
     return `Hello world from ${process.env.NEXT_RUNTIME} runtime!`;
-})
+}, schemas)
+
 export const runtime = "edge"
