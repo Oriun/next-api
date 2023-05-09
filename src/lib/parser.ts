@@ -42,9 +42,9 @@ export function queryParser<T extends Any>(request: NextRequest, schema?: T) {
     return query
 }
 
-export function paramsParser<T extends Any>(variables: any, schema?: T) {
+export function paramsParser<T extends Any>(variables: any | undefined, schema?: T) {
 
-    let params = variables.params ?? {} as z.infer<T>
+    let params = variables?.params ?? {} as z.infer<T>
 
     if (schema) {
         const parsedParams = schema.safeParse(
