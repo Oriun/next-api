@@ -32,10 +32,11 @@ export type Handler<Q extends Any = Any,
         request: NextRequest,
     ) => any | Promise<any>
 
+export type MiddlewareReturn = Record<string, any> | void
 export type Middleware<Q extends Any = Any,
     P extends Any = Any,
     B extends Any = Any,
     C extends Any = Any> = (
         variables: Variables<Q, P, B, C>,
         request: NextRequest,
-    ) => Record<string, any> | Promise<Record<string, any>>
+    ) => MiddlewareReturn | Promise<MiddlewareReturn>
