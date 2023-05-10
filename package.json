@@ -1,6 +1,6 @@
 {
   "name": "@oriun/next-api",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": false,
   "license": "MIT",
   "description": "Next.js API routes with Zod validation",
@@ -28,8 +28,8 @@
     "prepublish": "npm run lib"
   },
   "peerDependencies": {
-    "next": "^13.4.1",
-    "zod": "^3.21.4"
+    "next": ">=13.4",
+    "zod": ">=3.21"
   },
   "devDependencies": {
     "@types/node": "20.1.0",
