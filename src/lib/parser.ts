@@ -47,9 +47,7 @@ export function paramsParser<T extends Any>(variables: any | undefined, schema?:
     let params = variables?.params ?? {} as z.infer<T>
 
     if (schema) {
-        const parsedParams = schema.safeParse(
-            variables.params ?? {}
-        )
+        const parsedParams = schema.safeParse(params)
         if (!parsedParams.success)
             throw new Response(JSON.stringify(parsedParams.error), {
                 status: 400,
