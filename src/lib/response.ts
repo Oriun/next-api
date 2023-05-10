@@ -13,6 +13,9 @@ const plainResponse = z.strictObject({
     cookies: z.record(z.string()).default({}),
 })
 
+const nullBodyStatuses = [101, 204, 205, 304];
+
+
 export function withCookies(response: Response, cookies: Record<string, string>) {
 
     for (const [name, value] of Object.entries(cookies)) {
@@ -58,9 +61,12 @@ export function responseParser(response: any) {
 
     const { data } = parsedResponse
 
-    return withCookies(new Response(JSON.stringify(data.body), {
+    const shouldHaveNullBody = nullBodyStatuses.includes(data.status);
+    const body = data.body !== null ? shouldHaveNullBody ? null : JSON.stringify(data.body) : null;
+
+    return withCookies(new Response(body, {
         status: data.status,
         headers: data.headers,
-    }), data.cookies)
+    }), data.cookies);
 
 }
