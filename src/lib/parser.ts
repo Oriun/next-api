@@ -3,9 +3,12 @@ import { Any } from "./types";
 import { z } from "zod";
 
 const CONTENT_TYPE = "content-type"
+const CONTENT_LENGTH = "content-length"
 const JSON_MIME = "application/json"
 
 export async function bodyParser<T extends Any>(request: NextRequest, schema?: T) {
+
+    if (request.headers.get(CONTENT_LENGTH) === "0") return {}
 
     const contentType = request.headers.get(CONTENT_TYPE)
     const bodyFormat = contentType?.startsWith(JSON_MIME) ? "json" : "text";

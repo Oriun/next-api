@@ -1,4 +1,4 @@
-import { handlerA, handlerB } from "./decorators"
+import { handlerA, handlerB, handlerC } from "./decorators"
 
 class Route {
     @handlerA()
@@ -9,6 +9,11 @@ class Route {
     DELETE() {
         return "This will never be called"
     }
+
+    @handlerC()
+    POST() {
+        throw new Error("This error will be caught by the error handler")
+    }
 }
 
-export const { GET, DELETE } = new Route()
+export const { GET, DELETE, POST } = new Route()

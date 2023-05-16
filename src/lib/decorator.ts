@@ -1,5 +1,5 @@
 import { compose } from './composer'
-import { Any, Middleware, Schemas } from './types'
+import { Any, CreateApiParams, ErrorHandler, Middleware, Schemas } from './types'
 import { api, createAPI } from './wrapper'
 
 
@@ -9,7 +9,8 @@ export function API<
     B extends Any = Any,
     C extends Any = Any
 >(
-    schemas: Schemas<Q, P, B, C> = {}
+    schemas: Schemas<Q, P, B, C> = {},
+    errorHandlers: ErrorHandler[] = []
 ) {
     return function (
         _target: any,
@@ -18,15 +19,15 @@ export function API<
     ): TypedPropertyDescriptor<any> {
         return {
             get() {
-                return api(descriptor.value, schemas)
+                return api(descriptor.value, schemas, errorHandlers)
             },
         }
     }
 }
 
-export function createAPIDecorator(...middlewares: Middleware[]) {
-    const composition = createAPI(...middlewares)
-    return function (schema: Schemas = {}) {
+export function createAPIDecorator({ middlewares = [], errorHandlers = [] }: CreateApiParams = {}) {
+    const composition = createAPI({ middlewares, errorHandlers })
+    return function (schema: Schemas = {}, localErrorHandlers: ErrorHandler[] = []) {
         return function (
             _target: any,
             _propertyKey: string,
@@ -34,7 +35,7 @@ export function createAPIDecorator(...middlewares: Middleware[]) {
         ): TypedPropertyDescriptor<any> {
             return {
                 get() {
-                    return composition(descriptor.value, schema)
+                    return composition(descriptor.value, schema, localErrorHandlers)
                 },
             }
         }

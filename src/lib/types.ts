@@ -40,3 +40,13 @@ export type Middleware<Q extends Any = Any,
         variables: Variables<Q, P, B, C>,
         request: NextRequest,
     ) => MiddlewareReturn | Promise<MiddlewareReturn>
+
+export type ErrorHandler<Q extends Any = Any,
+    P extends Any = Any,
+    B extends Any = Any,
+    C extends Any = Any> = (error: any, variables: any, request: NextRequest) => Response | Promise<Response> | void | null | undefined
+
+export type CreateApiParams = {
+    middlewares?: Middleware[],
+    errorHandlers?: ErrorHandler[]
+}

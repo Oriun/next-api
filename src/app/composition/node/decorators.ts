@@ -8,6 +8,13 @@ import { firstMiddleware, secondMiddleware } from "../middleware";
  * for i.e. authenticated routes
  */
 
-export const handlerA = createAPIDecorator(firstMiddleware)
+export const handlerA = createAPIDecorator({ middlewares: [firstMiddleware] })
 
-export const handlerB = createAPIDecorator(firstMiddleware, secondMiddleware)
+export const handlerB = createAPIDecorator({ middlewares: [firstMiddleware, secondMiddleware] })
+
+function wrapError(error: any) {
+    return new Response(JSON.stringify(`caught error : ${error.message}`), {
+        status: 400,
+    })
+}
+export const handlerC = createAPIDecorator({ errorHandlers: [wrapError] })
