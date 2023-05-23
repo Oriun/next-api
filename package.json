@@ -1,6 +1,6 @@
 {
   "name": "@oriun/next-api",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": false,
   "license": "MIT",
   "description": "Next.js API routes with Zod validation",

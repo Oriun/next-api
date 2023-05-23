@@ -6,14 +6,24 @@ const CONTENT_TYPE = "content-type"
 const CONTENT_LENGTH = "content-length"
 const JSON_MIME = "application/json"
 
+const BODYLESS_METHODS = ["GET", "HEAD", "OPTIONS"]
+
 export async function bodyParser<T extends Any>(request: NextRequest, schema?: T) {
 
     if (request.headers.get(CONTENT_LENGTH) === "0") return {}
 
     const contentType = request.headers.get(CONTENT_TYPE)
     const bodyFormat = contentType?.startsWith(JSON_MIME) ? "json" : "text";
+    const shouldHaveBody = !BODYLESS_METHODS.includes(request.method)
 
     const body: z.infer<T> = await request[bodyFormat]()
+        .catch(() => {
+            if (!shouldHaveBody)
+                return bodyFormat === "json" ? {} : ""
+            throw new Response("Invalid body", {
+                status: 400,
+            })
+        })
 
     if (schema) {
         const parsedBody = schema.safeParse(body)
