@@ -3,16 +3,19 @@ import { Any } from "./types";
 import { z } from "zod";
 
 const CONTENT_TYPE = "content-type"
-const CONTENT_LENGTH = "content-length"
 const JSON_MIME = "application/json"
+const FORM_DATA_MIME = "multipart/form-data"
+const BAD_REQUEST = 400
 
 const BODYLESS_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 export async function bodyParser<T extends Any>(request: NextRequest, schema?: T) {
 
-    if (request.headers.get(CONTENT_LENGTH) === "0") return {}
-
     const contentType = request.headers.get(CONTENT_TYPE)
+    const isFormData = contentType?.startsWith(FORM_DATA_MIME)
+
+    if (isFormData) return request.formData()
+
     const bodyFormat = contentType?.startsWith(JSON_MIME) ? "json" : "text";
     const shouldHaveBody = !BODYLESS_METHODS.includes(request.method)
 
@@ -21,7 +24,7 @@ export async function bodyParser<T extends Any>(request: NextRequest, schema?: T
             if (!shouldHaveBody)
                 return bodyFormat === "json" ? {} : ""
             throw new Response("Invalid body", {
-                status: 400,
+                status: BAD_REQUEST,
             })
         })
 
@@ -29,7 +32,10 @@ export async function bodyParser<T extends Any>(request: NextRequest, schema?: T
         const parsedBody = schema.safeParse(body)
         if (!parsedBody.success)
             throw new Response(JSON.stringify(parsedBody.error), {
-                status: 400,
+                status: BAD_REQUEST,
+                headers: {
+                    CONTENT_TYPE: JSON_MIME
+                }
             })
         return parsedBody.data as z.infer<T>
     }
@@ -47,7 +53,10 @@ export function queryParser<T extends Any>(request: NextRequest, schema?: T) {
         const parsedQuery = schema.safeParse(query)
         if (!parsedQuery.success)
             throw new Response(JSON.stringify(parsedQuery.error), {
-                status: 400,
+                status: BAD_REQUEST,
+                headers: {
+                    CONTENT_TYPE: JSON_MIME
+                }
             })
         return parsedQuery.data as z.infer<T>
     }
@@ -63,7 +72,10 @@ export function paramsParser<T extends Any>(variables: any | undefined, schema?:
         const parsedParams = schema.safeParse(params)
         if (!parsedParams.success)
             throw new Response(JSON.stringify(parsedParams.error), {
-                status: 400,
+                status: BAD_REQUEST,
+                headers: {
+                    CONTENT_TYPE: JSON_MIME
+                }
             })
         return parsedParams.data as z.infer<T>
     }
@@ -84,7 +96,10 @@ export function cookiesParser<T extends Any>(request: NextRequest, schema?: T) {
         const parsedCookies = schema.safeParse(cookies)
         if (!parsedCookies.success)
             throw new Response(JSON.stringify(parsedCookies.error), {
-                status: 400,
+                status: BAD_REQUEST,
+                headers: {
+                    CONTENT_TYPE: JSON_MIME
+                }
             })
         return parsedCookies.data as z.infer<T>
     }
