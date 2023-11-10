@@ -66,7 +66,10 @@ export function responseParser(response: any) {
 
     return withCookies(new Response(body, {
         status: data.status,
-        headers: data.headers,
+        headers: {
+            "content-type": "application/json",
+            ...data.headers,
+        },
     }), data.cookies);
 
 }
