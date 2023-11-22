@@ -36,7 +36,7 @@ export function api<
 
       const response = await handler.call(null, variables, request);
 
-      return responseParser(response);
+      return responseParser(response, request);
     } catch (e) {
       if (e instanceof Response) return e;
       for (const errorHandler of errorHandlers) {
