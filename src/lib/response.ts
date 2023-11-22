@@ -24,7 +24,7 @@ export function withCorsHeaders(origin: string, response: Response) {
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods":
         "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH",
-      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Cookies, Authorization, X-Api-Key, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
     };
 
     for (const [name, value] of Object.entries(headers)) {
