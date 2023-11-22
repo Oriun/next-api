@@ -15,13 +15,13 @@ const plainResponse = z.strictObject({
 
 const nullBodyStatuses = [101, 204, 205, 304];
 
-export function withCorsHeaders(response: Response) {
+export function withCorsHeaders(origin: string, response: Response) {
     
     const headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
       "Access-Control-Allow-Credentials": "true",
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods":
         "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH",
       "Access-Control-Allow-Headers": "*",
@@ -43,20 +43,22 @@ export function withCookies(response: Response, cookies: Record<string, string>)
     return response
 }
 
-export function responseParser(response: any) {
+export function responseParser(response: any, request: Request) {
 
+    const cors = withCorsHeaders.bind(null, request.headers.get("origin") ?? "*")
+    
     if (response instanceof Response) {
-        return withCorsHeaders(response)
+        return cors(response)
     }
 
     if (typeof response !== "object") {
-        return withCorsHeaders(new Response(JSON.stringify(response)))
+        return cors(new Response(JSON.stringify(response)))
     }
 
     const parsedRedirect = redirectResponse.safeParse(response)
     if (parsedRedirect.success) {
         const { status, redirect, cookies } = parsedRedirect.data
-        return withCookies(withCorsHeaders(new Response(null, {
+        return withCookies(cors(new Response(null, {
             status,
             headers: {
                 "content-type": "text/plain",
@@ -67,7 +69,7 @@ export function responseParser(response: any) {
 
     const parsedResponse = plainResponse.safeParse(response)
     if (!parsedResponse.success) {
-        return withCorsHeaders(new Response(JSON.stringify(response)))
+        return cors(new Response(JSON.stringify(response)))
     }
 
     const { data } = parsedResponse
@@ -75,7 +77,7 @@ export function responseParser(response: any) {
     const shouldHaveNullBody = nullBodyStatuses.includes(data.status);
     const body = data.body !== null ? shouldHaveNullBody ? null : JSON.stringify(data.body) : null;
 
-    return withCookies(withCorsHeaders(new Response(body, {
+    return withCookies(cors(new Response(body, {
         status: data.status,
         headers: {
             "content-type": "application/json",
