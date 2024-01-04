@@ -45,9 +45,15 @@ export async function bodyParser<T extends Any>(req: NextRequest, schema?: T) {
 
 export function queryParser<T extends Any>(request: NextRequest, schema?: T) {
 
-    const searchParams = request.nextUrl.searchParams
+    const searchParams = new URL(request.url).searchParams
 
     const query = Object.fromEntries(searchParams) as z.infer<T>
+
+    for(const [key] of Object.entries(query)) {
+        if(key.startsWith("nxtP")) {
+            delete query[key]
+        }
+    }
 
     if (schema) {
         const parsedQuery = schema.safeParse(query)
