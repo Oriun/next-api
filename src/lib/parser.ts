@@ -9,8 +9,8 @@ const BAD_REQUEST = 400
 
 const BODYLESS_METHODS = ["GET", "HEAD", "OPTIONS"]
 
-export async function bodyParser<T extends Any>(request: NextRequest, schema?: T) {
-
+export async function bodyParser<T extends Any>(req: NextRequest, schema?: T) {
+    const request = req.clone()
     const contentType = request.headers.get(CONTENT_TYPE)
     const isFormData = contentType?.startsWith(FORM_DATA_MIME)
 
